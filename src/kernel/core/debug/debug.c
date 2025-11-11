@@ -4,13 +4,13 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-#include "../gc/internals.h"
 #include "../../json/json.h" // for pretty printing JSON values
+#include "../gc/internals.h"
 
-#include "./log.c"
+#include "./core-evaluators.c"
 #include "./debug-c.c"
 #include "./debug-elm.c"
-#include "./core-evaluators.c"
+#include "./log.c"
 
 #if PERF_TIMER_ENABLED
 #include "./debug-perf.c"

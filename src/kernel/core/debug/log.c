@@ -23,64 +23,62 @@
  * Our GC needs to be the only memory manager in the program
  * Otherwise printf would segfault after the GC resizes the heap
  */
-void safe_vprintf(const char* format, va_list va) {
-  char buf[LOG_BUFFER_BYTES];
-  int count = stbsp_vsnprintf(buf, sizeof(buf), format, va);
+void safe_vprintf(const char *format, va_list va) {
+    char buf[LOG_BUFFER_BYTES];
+    int count = stbsp_vsnprintf(buf, sizeof(buf), format, va);
 
-  int written = WRITE_BYTES_TO_STDOUT(buf, count);
-  ASSERT_EQUAL(written, count);
+    int written = WRITE_BYTES_TO_STDOUT(buf, count);
+    ASSERT_EQUAL(written, count);
 }
 
-void safe_printf(const char* format, ...) {
-  va_list va;
-  va_start(va, format);
-  safe_vprintf(format, va);
-  va_end(va);
+void safe_printf(const char *format, ...) {
+    va_list va;
+    va_start(va, format);
+    safe_vprintf(format, va);
+    va_end(va);
 }
 
 
 // Execute the JS `debugger` statement (browser devtools)
-void Debug_pause() {
-  emscripten_run_script("debugger;");
-}
+void Debug_pause() { emscripten_run_script("debugger;"); }
 
 
 #ifdef __EMSCRIPTEN__
-void log_error(char* fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
-  // print_heap();
-  safe_printf("\n");
-  safe_printf("------------------------------------------------------\n");
-  safe_printf("ERROR!\n");
-  safe_printf("\nGC state:\n");
-  print_state();
-  print_stack_map();
-  // fprintf(stderr, fmt, args);
-  safe_printf("\n");
-  safe_vprintf(fmt, args);
-  va_end(args);
-  // emscripten_run_script("debugger;");
-  exit(1);
+void log_error(char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    // print_heap();
+    safe_printf("\n");
+    safe_printf("------------------------------------------------------\n");
+    safe_printf("ERROR!\n");
+    safe_printf("\nGC state:\n");
+    print_state();
+    print_stack_map();
+    // fprintf(stderr, fmt, args);
+    safe_printf("\n");
+    safe_vprintf(fmt, args);
+    va_end(args);
+    // emscripten_run_script("debugger;");
+    exit(1);
 }
 #else
-void log_error(char* fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
-  safe_vprintf(fmt, args);
-  va_end(args);
-  exit(1);
+void log_error(char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    safe_vprintf(fmt, args);
+    va_end(args);
+    exit(1);
 }
 #endif
 
 
 #if defined(DEBUG) && defined(DEBUG_LOG)
-void log_debug(char* fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
-  safe_vprintf(fmt, args);
-  va_end(args);
+void log_debug(char *fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    safe_vprintf(fmt, args);
+    va_end(args);
 }
 #else
-void log_debug(char* fmt, ...) {}
+void log_debug(char *fmt, ...) {}
 #endif

@@ -7,29 +7,29 @@
 #define JSON_CTOR_OFFSET 0x2000 * 10000
 
 enum ctor_decoder {
-  DECODER_SUCCEED = KERNEL_CTOR_OFFSET,
-  DECODER_FAIL,
-  DECODER_INT,
-  DECODER_BOOL,
-  DECODER_FLOAT,
-  DECODER_VALUE,
-  DECODER_STRING,
-  DECODER_LIST,
-  DECODER_ARRAY,
-  DECODER_NULL,
-  DECODER_FIELD,
-  DECODER_INDEX,
-  DECODER_KEY_VALUE,
-  DECODER_MAP,
-  DECODER_AND_THEN,
-  DECODER_ONE_OF,
+    DECODER_SUCCEED = KERNEL_CTOR_OFFSET,
+    DECODER_FAIL,
+    DECODER_INT,
+    DECODER_BOOL,
+    DECODER_FLOAT,
+    DECODER_VALUE,
+    DECODER_STRING,
+    DECODER_LIST,
+    DECODER_ARRAY,
+    DECODER_NULL,
+    DECODER_FIELD,
+    DECODER_INDEX,
+    DECODER_KEY_VALUE,
+    DECODER_MAP,
+    DECODER_AND_THEN,
+    DECODER_ONE_OF,
 };
 
 enum ctor_value {
-  JSON_VALUE_WRAP = JSON_CTOR_OFFSET,
-  JSON_VALUE_NULL,
-  JSON_VALUE_OBJECT,
-  JSON_VALUE_ARRAY,
+    JSON_VALUE_WRAP = JSON_CTOR_OFFSET,
+    JSON_VALUE_NULL,
+    JSON_VALUE_OBJECT,
+    JSON_VALUE_ARRAY,
 };
 
 // Decode
@@ -62,7 +62,7 @@ extern Closure Json_map8;
 
 extern Closure Json_run;
 extern Closure Json_runOnString;
-void* Json_runHelp(Custom* decoder, ElmValue* value);
+void *Json_runHelp(Custom *decoder, ElmValue *value);
 
 // Encode
 

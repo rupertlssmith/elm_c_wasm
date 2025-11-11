@@ -24,7 +24,7 @@
         [3] Abuaiadh et al, 2004
 */
 
-#include "../core.h"  // debug
+#include "../core.h" // debug
 #include "allocate.c"
 #include "bitmap.c"
 #include "compact.c"
@@ -37,8 +37,9 @@
 #ifdef TEST
 
 void (*gc_test_mark_callback)();
-#define TEST_MARK_CALLBACK() \
-  if (gc_test_mark_callback) gc_test_mark_callback()
+#define TEST_MARK_CALLBACK()                                                                                           \
+    if (gc_test_mark_callback)                                                                                         \
+    gc_test_mark_callback()
 
 #else
 #define TEST_MARK_CALLBACK()
@@ -54,39 +55,39 @@ GcState gc_state;
 
 extern Queue Scheduler_queue;
 Cons coreRoots = {
-    .header = HEADER_LIST,
-    .head = &Scheduler_queue.front,
-    .tail = &Nil,
+        .header = HEADER_LIST,
+        .head = &Scheduler_queue.front,
+        .tail = &Nil,
 };
 
-void reset_state(GcState* state) {
-  void* start = state->heap.start;
-  state->next_alloc = start;
-  state->end_of_alloc_patch = state->heap.end;
-  state->end_of_old_gen = start;
-  state->n_marked_words = 0;
-  state->roots = &coreRoots;
-  stack_reset();
+void reset_state(GcState *state) {
+    void *start = state->heap.start;
+    state->next_alloc = start;
+    state->end_of_alloc_patch = state->heap.end;
+    state->end_of_old_gen = start;
+    state->n_marked_words = 0;
+    state->roots = &coreRoots;
+    stack_reset();
 }
 
 #if PERF_TIMER_ENABLED
 void perf_get_baseline() {
-  for (int i = 0; i < 3000000; i++) {
-  }
+    for (int i = 0; i < 3000000; i++) {
+    }
 }
 #endif
 
 // Call exactly once on program startup
 int GC_init() {
-  GcState* state = &gc_state;  // local reference for debugger to see
-  int err = init_heap(&state->heap);
-  reset_state(state);
+    GcState *state = &gc_state; // local reference for debugger to see
+    int err = init_heap(&state->heap);
+    reset_state(state);
 
 #if PERF_TIMER_ENABLED
-  PERF_TIMED_STATEMENT(perf_get_baseline());
+    PERF_TIMED_STATEMENT(perf_get_baseline());
 #endif
 
-  return err;
+    return err;
 }
 
 
@@ -105,10 +106,10 @@ int GC_init() {
     - We're not actually using this yet since most kernel code is in JS
     - Using a list instead of a C array supports this case.
 */
-void GC_register_root(void** ptr_to_mutable_ptr) {
-  GcState* state = &gc_state;
-  state->roots = newCons(ptr_to_mutable_ptr, state->roots);
-  GC_stack_pop_value();
+void GC_register_root(void **ptr_to_mutable_ptr) {
+    GcState *state = &gc_state;
+    state->roots = newCons(ptr_to_mutable_ptr, state->roots);
+    GC_stack_pop_value();
 }
 
 
@@ -120,30 +121,31 @@ void GC_register_root(void** ptr_to_mutable_ptr) {
 
 #if GC_DO_SWEEP
 
-void sweep_space(size_t* start_of_space, size_t* end_of_space) {
-  size_t* w = start_of_space;
-  if (!TARGET_64BIT && ((size_t)w & 7) && (w < end_of_space)) {
-    *w++ = 0;
-  }
-  u64* p = (u64*)w;
-  for (; p < (u64*)(end_of_space - 1); p++) {
-    *p = 0;
-  }
-  for (w = (size_t*)p; w < end_of_space; w++) {
-    *w = 0;
-  }
+void sweep_space(size_t *start_of_space, size_t *end_of_space) {
+    size_t *w = start_of_space;
+    if (!TARGET_64BIT && ((size_t) w & 7) && (w < end_of_space)) {
+        *w++ = 0;
+    }
+    u64 *p = (u64 *) w;
+    for (; p < (u64 *) (end_of_space - 1); p++) {
+        *p = 0;
+    }
+    for (w = (size_t *) p; w < end_of_space; w++) {
+        *w = 0;
+    }
 }
 
 // Sweep up the garbage by writing zeros to all the unused spaces in the heap
 // This is not actually necessary, it's just nice for debug
-void sweep(GcHeap* heap, size_t* start) {
-  size_t* end_of_space = start;
-  size_t* start_of_space = bitmap_find_space(heap, end_of_space, 1, &end_of_space);
-  for (;;) {
-    size_t* start_of_space = bitmap_find_space(heap, end_of_space, 1, &end_of_space);
-    if (!start_of_space) break;
-    sweep_space(start_of_space, end_of_space);
-  }
+void sweep(GcHeap *heap, size_t *start) {
+    size_t *end_of_space = start;
+    size_t *start_of_space = bitmap_find_space(heap, end_of_space, 1, &end_of_space);
+    for (;;) {
+        size_t *start_of_space = bitmap_find_space(heap, end_of_space, 1, &end_of_space);
+        if (!start_of_space)
+            break;
+        sweep_space(start_of_space, end_of_space);
+    }
 }
 
 #endif
@@ -159,16 +161,16 @@ void sweep(GcHeap* heap, size_t* start) {
  * Can be used during execution. Does not move any live pointers.
  */
 void GC_collect_minor() {
-  GcState* state = &gc_state;
-  size_t* ignore_below = state->end_of_old_gen;
+    GcState *state = &gc_state;
+    size_t *ignore_below = state->end_of_old_gen;
 
-  // safe_printf("\nStarting minor GC from %p\n", ignore_below);
+    // safe_printf("\nStarting minor GC from %p\n", ignore_below);
 
-  PERF_TIMED_STATEMENT(mark(state, ignore_below));
-  TEST_MARK_CALLBACK();
+    PERF_TIMED_STATEMENT(mark(state, ignore_below));
+    TEST_MARK_CALLBACK();
 
 #if GC_DO_SWEEP
-  PERF_TIMED_STATEMENT(sweep(&state->heap, ignore_below));
+    PERF_TIMED_STATEMENT(sweep(&state->heap, ignore_below));
 #endif
 
 #if 0
@@ -182,10 +184,10 @@ void GC_collect_minor() {
     safe_printf("Minor GC marked %f%% (%s / %s)\n", percent_marked, marked, available);
 #endif
 
-  PERF_TIMED_STATEMENT(sweepJsRefs(false));
+    PERF_TIMED_STATEMENT(sweepJsRefs(false));
 
 #if PERF_TIMER_ENABLED
-  perf_print();
+    perf_print();
 #endif
 }
 
@@ -195,40 +197,40 @@ void GC_collect_minor() {
  * Not to be used during execution. Moves pointers by compaction.
  */
 void GC_collect_major() {
-  GcState* state = &gc_state;
-  size_t* ignore_below = state->heap.start;
+    GcState *state = &gc_state;
+    size_t *ignore_below = state->heap.start;
 
 #ifdef DEBUG
-  if (state->stack_map.index) {
-    print_stack_map();
-    ASSERT_EQUAL(state->stack_map.index, 0);
-  }
+    if (state->stack_map.index) {
+        print_stack_map();
+        ASSERT_EQUAL(state->stack_map.index, 0);
+    }
 #endif
-  PERF_TIMED_STATEMENT(mark(state, ignore_below));
-  TEST_MARK_CALLBACK();
+    PERF_TIMED_STATEMENT(mark(state, ignore_below));
+    TEST_MARK_CALLBACK();
 
-  PERF_TIMED_STATEMENT(compact(state, ignore_below));
+    PERF_TIMED_STATEMENT(compact(state, ignore_below));
 
 #if GC_DO_SWEEP
-  PERF_TIMED_STATEMENT(sweep_space(state->end_of_old_gen, state->heap.end));
+    PERF_TIMED_STATEMENT(sweep_space(state->end_of_old_gen, state->heap.end));
 #endif
 
-  PERF_TIMED_STATEMENT(bitmap_reset(&state->heap));
+    PERF_TIMED_STATEMENT(bitmap_reset(&state->heap));
 
-  PERF_TIMED_STATEMENT(sweepJsRefs(true));
+    PERF_TIMED_STATEMENT(sweepJsRefs(true));
 
-  size_t used = state->next_alloc - state->heap.start;
-  size_t available = state->heap.end - state->heap.start;
-  // safe_printf("Major GC: %zd kB used, %zd kb available\n",
-  // used * SIZE_UNIT / 1024,
-  // available * SIZE_UNIT / 1024);
+    size_t used = state->next_alloc - state->heap.start;
+    size_t available = state->heap.end - state->heap.start;
+    // safe_printf("Major GC: %zd kB used, %zd kb available\n",
+    // used * SIZE_UNIT / 1024,
+    // available * SIZE_UNIT / 1024);
 
-  if (used * 2 > available) {
-    PERF_TIMED_STATEMENT(grow_heap(&state->heap, 0));
-  }
+    if (used * 2 > available) {
+        PERF_TIMED_STATEMENT(grow_heap(&state->heap, 0));
+    }
 
 #if PERF_TIMER_ENABLED
-  perf_print();
+    perf_print();
 #endif
 }
 
@@ -241,14 +243,14 @@ void GC_collect_major() {
 
    ==================================================== */
 
-void* GC_execute(Closure* c) {
-  // TODO: remove this redundant stack frame! JS wrapper has already created one.
-  GcStackMapIndex frame = GC_stack_push_frame('C', c->evaluator);
-  GC_stack_push_value(c);
+void *GC_execute(Closure *c) {
+    // TODO: remove this redundant stack frame! JS wrapper has already created one.
+    GcStackMapIndex frame = GC_stack_push_frame('C', c->evaluator);
+    GC_stack_push_value(c);
 
-  void* result = Utils_apply(c, 0, NULL);
+    void *result = Utils_apply(c, 0, NULL);
 
-  GC_stack_pop_frame(c->evaluator, result, frame);
+    GC_stack_pop_frame(c->evaluator, result, frame);
 
 #if 0
   if (is_major_gc_needed()) {
@@ -256,7 +258,7 @@ void* GC_execute(Closure* c) {
     result = forwarding_address(&gc_state.heap, result);
   }
 #endif
-  return result;
+    return result;
 }
 
 
@@ -271,19 +273,19 @@ void* GC_execute(Closure* c) {
             to initialise the global value
   ==================================================== */
 
-void GC_init_root(void** global_permanent_ptr, void* (*init_func)()) {
+void GC_init_root(void **global_permanent_ptr, void *(*init_func)()) {
 #ifdef DEBUG
-  GcState* state = &gc_state;
-  if (state->stack_map.index) {
-    print_stack_map();
-    ASSERT(state->stack_map.index, 0);
-  }
+    GcState *state = &gc_state;
+    if (state->stack_map.index) {
+        print_stack_map();
+        ASSERT(state->stack_map.index, 0);
+    }
 #endif
 
-  GC_register_root(global_permanent_ptr);
+    GC_register_root(global_permanent_ptr);
 
-  GcStackMapIndex frame = GC_stack_push_frame('I', init_func);
-  *global_permanent_ptr = init_func();
-  GC_stack_pop_frame(init_func, NULL, frame);
-  GC_stack_pop_value();
+    GcStackMapIndex frame = GC_stack_push_frame('I', init_func);
+    *global_permanent_ptr = init_func();
+    GC_stack_pop_frame(init_func, NULL, frame);
+    GC_stack_pop_value();
 }
