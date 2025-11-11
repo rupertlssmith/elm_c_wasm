@@ -38,30 +38,6 @@ Install the following packages:
 
     sudo apt install clang lld ninja-build cmake ccache
 
-Next you need to checkout the LLVM project and build and install it on
-your system:
-
-    LLVM_VERSION=21.1.4
-    git clone --branch "llvmorg-${LLVM_VERSION}" https://github.com/llvm/llvm-project.git
-
-    cd llvm-project
-    cmake -S llvm -B build -G Ninja \
-    -DLLVM_ENABLE_PROJECTS="mlir" \
-    -DLLVM_TARGETS_TO_BUILD="Native;NVPTX;AMDGPU" \
-    -DLLVM_ENABLE_ASSERTIONS=ON \
-    -DLLVM_ENABLE_RTTI=ON \
-    -DMLIR_ENABLE_CMAKE_PACKAGE=ON \
-    -DLLVM_ENABLE_ZLIB=OFF \
-    -DLLVM_ENABLE_LIBXML2=OFF \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DCMAKE_C_COMPILER=clang \
-    -DCMAKE_CXX_COMPILER=clang++ \
-    -DLLVM_USE_LINKER=lld \
-    -DCMAKE_INSTALL_PREFIX=/opt/llvm-mlir
-
-    cmake --build build
-    sudo cmake --install build
-
 A CMake preset configuration to build with ninja, clang and lld exists in
 `CMakePresets.json`. Set up the build in this project with:
 
